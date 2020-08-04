@@ -28,17 +28,18 @@ export class CdkAppStack extends cdk.Stack {
         runtime: "nodejs12.x",
         handler: "index.handler",
         functionName: LAMBDA_FUNC1_NAME,
-        codeUri: "lib/lambda/lambda1",
+        codeUri: "lib/lambda/lambda1",　// sam cliのコマンドを実行するパスを考慮してPRJルートからのパスを設定する
         memorySize: 128,
         role: lambdaRole.roleArn
       })
 
-    //subscription filter用Lambda関数
+    // subscription filter用のeventトリガ設定
     const subscriptionFilterEventLambda1: sam.CfnFunction.EventSourceProperty = {
       type: "CloudWatchLogs",
       properties: { filterPattern: "[Error]", logGroupName: `/aws/lambda/${LAMBDA_FUNC1_NAME}` }
     }
 
+    //subscription filter用Lambda関数
     const subscriptionLambda = new sam.CfnFunction(this, LAMBDA_SUBSCRIPTION_NAME, {
       runtime: "nodejs12.x",
       handler: "index.handler",
