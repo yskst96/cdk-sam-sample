@@ -31,7 +31,7 @@ Resources:
   cdkappfunction1:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambda/lambda1
+      CodeUri: lib/lambda/lambda1
       Handler: index.handler
       Runtime: nodejs12.x
       FunctionName: cdk-app-function-1
@@ -47,14 +47,14 @@ Resources:
   cdkappsubscription:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: lambda/subscription
+      CodeUri: lib/lambda/subscription
       Handler: index.handler
       Runtime: nodejs12.x
       Events:
-        subscriptionFilterEvent:
+        subscriptionFilterEventLambda1:
           Properties:
-            FilterPattern: 笆Error
-            LogGroupName: /aws/lambda/cdk-app-subscription
+            FilterPattern: '[Error]'
+            LogGroupName: /aws/lambda/cdk-app-function-1
           Type: CloudWatchLogs
       FunctionName: cdk-app-subscription
       MemorySize: 128

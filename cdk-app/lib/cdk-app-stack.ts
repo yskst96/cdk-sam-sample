@@ -28,25 +28,25 @@ export class CdkAppStack extends cdk.Stack {
         runtime: "nodejs12.x",
         handler: "index.handler",
         functionName: LAMBDA_FUNC1_NAME,
-        codeUri: "lambda/lambda1",
+        codeUri: "lib/lambda/lambda1",
         memorySize: 128,
         role: lambdaRole.roleArn
       })
 
     //subscription filter用Lambda関数
-    const subscriptionFilterEvent: sam.CfnFunction.EventSourceProperty = {
+    const subscriptionFilterEventLambda1: sam.CfnFunction.EventSourceProperty = {
       type: "CloudWatchLogs",
-      properties: { filterPattern: "[Error]", logGroupName: `/aws/lambda/${LAMBDA_SUBSCRIPTION_NAME}` }
+      properties: { filterPattern: "[Error]", logGroupName: `/aws/lambda/${LAMBDA_FUNC1_NAME}` }
     }
 
     const subscriptionLambda = new sam.CfnFunction(this, LAMBDA_SUBSCRIPTION_NAME, {
       runtime: "nodejs12.x",
       handler: "index.handler",
       functionName: LAMBDA_SUBSCRIPTION_NAME,
-      codeUri: "lambda/subscription",
+      codeUri: "lib/lambda/subscription",
       memorySize: 128,
       role: lambdaRole.roleArn,
-      events: { subscriptionFilterEvent }
+      events: { subscriptionFilterEventLambda1 }
     })
 
     cdk.Tag.add(lambda1, 'app', 'cdk-app')

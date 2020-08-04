@@ -28,18 +28,21 @@ cdk init app --language=typescript
 cdk bootstrap
 ```
 
-- Cfn のテンプレートを標準出力に出力
+- Cfn のテンプレートを出力してデプロイ(sam cli 利用)
 
 ```
 npm run build
 cdk synth > app-template.yaml
+
+sam package -t app-template.yaml --s3-bucket yskst96-sam-resources --output-template-file packaged.yaml
+sam deploy --template-file packaged.yaml --stack-name cdk-sam-app --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM
 ```
 
 - CLI から直接デプロイする場合
 
 ```
 npm run build
-cdk deploy
+cdk deploy //samの変換がないためエラーになる...
 ```
 
 - 差分比較
