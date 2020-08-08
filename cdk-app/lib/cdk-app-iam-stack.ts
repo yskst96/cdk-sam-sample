@@ -7,6 +7,8 @@ import * as lambda from '@aws-cdk/aws-lambda'
  * IAM周り
  */
 export class CdkAppIamStack extends cdk.Stack {
+
+  public readonly lambdaRoleExportName: string;
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
@@ -19,6 +21,15 @@ export class CdkAppIamStack extends cdk.Stack {
     cdk.Tag.add(lambdaRole, 'app', 'cdk-app')
 
     //IAMをoutputしたい
+    const output = new cdk.CfnOutput(this, roleName + '-output', {
+      description: 'cdk-appのlambda実行ロール',
+      value: lambdaRole.roleArn
+    });
+
+    if (output.exportName) {
+      this.lambdaRoleExportName = output.exportName
+    }
+
 
   }
 }
