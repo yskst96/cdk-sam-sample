@@ -17,7 +17,7 @@ export class CdkAppStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props: AppStackProps) {
     super(scope, id, props);
 
-    //Laayer
+    //Laayer定義
 
     //lamba用IAMロールをimportしたい
     const roleArn = cdk.Fn.importValue(props.lambdaRoleExportName)
