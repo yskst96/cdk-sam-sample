@@ -5,6 +5,7 @@ CDK を使ったサーバレスアプリのサンプル
 ## アプリ
 
 下記のリソースを CDK で構築
+@aws-cdk/aws-sam を使う ver とそうじゃない ver を試す
 
 - API Gateway
 - Lambda
@@ -42,7 +43,7 @@ sam deploy --template-file packaged.yaml --stack-name cdk-sam-app --capabilities
 
 ```
 npm run build
-cdk deploy //samの変換がないためエラーになる...
+cdk deploy //samのconstruct使うとcodeUriの変換がないためエラーになる...
 ```
 
 - 差分比較

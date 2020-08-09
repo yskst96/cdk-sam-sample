@@ -1,7 +1,7 @@
 import * as cdk from '@aws-cdk/core';
 import * as lambda from '@aws-cdk/aws-lambda'
 import * as iam from '@aws-cdk/aws-iam'
-
+import * as s3 from '@aws-cdk/aws-s3'
 
 const LAMBDA_FUNC2_NAME = "cdk-app-function-2"
 
@@ -34,6 +34,9 @@ export class CdkAppStack extends cdk.Stack {
     })
 
     // S3
+    const s3Bucket = new s3.Bucket(this, 'cdk-app-s3-bucket', { bucketName: 'cdk-app-s3-bucket' })
+
+    // s3 deployment クライアントの資源をビルドしておきたい
 
     //APIGateway
 
