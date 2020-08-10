@@ -10,6 +10,7 @@ const app = new cdk.App();
 //IAM系
 const IAMStack = new CdkAppIamStack(app, 'CdkAppIamStack');
 
+//アプリStack用props
 const appStackProps: AppStackProps = { lambdaRoleExportName: IAMStack.lambdaRoleExportName }
 
 //アプリ用(samなし)
@@ -18,5 +19,5 @@ const AppStack = new CdkAppStack(app, 'CdkAppStack', appStackProps);
 //依存関係の設定
 AppStack.addDependency(IAMStack)
 
-//アプリ用(samあり)
+//アプリ用(samあり) codeUriの振る舞いのところに不備があるのでこっちは非推奨
 new CdkAppSamStack(app, 'CdkAppSamStack');

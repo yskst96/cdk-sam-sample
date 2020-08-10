@@ -26,6 +26,10 @@ export class CdkAppStack extends cdk.Stack {
     const roleArn = cdk.Fn.importValue(props.lambdaRoleExportName)
     const lambdaRole = iam.Role.fromRoleArn(this, 'cdk-app-function-2-role-arn', roleArn)
 
+    // Lambda用Log Group
+    // 勝手に作られるけどCDKで管理するために明示的に作っとくのが良い
+    new logs.LogGroup(this, `cdk-app-lambda-loggroup`, { logGroupName: `/aws/lambda/${LAMBDA_FUNC2_NAME}`, retention: logs.RetentionDays.FIVE_DAYS })
+
     //lambda関数
     const lambdaFunction = new lambda.Function(this, LAMBDA_FUNC2_NAME, {
       runtime: lambda.Runtime.NODEJS_12_X,
