@@ -2,6 +2,7 @@ import * as cdk from '@aws-cdk/core';
 import * as lambda from '@aws-cdk/aws-lambda'
 import * as iam from '@aws-cdk/aws-iam'
 import * as s3 from '@aws-cdk/aws-s3'
+import * as s3Deployment from '@aws-cdk/aws-s3-deployment'
 
 const LAMBDA_FUNC2_NAME = "cdk-app-function-2"
 
@@ -34,9 +35,16 @@ export class CdkAppStack extends cdk.Stack {
     })
 
     // S3
-    const s3Bucket = new s3.Bucket(this, 'cdk-app-s3-bucket', { bucketName: 'cdk-app-s3-bucket' })
+    const s3Bucket = new s3.Bucket(this, 'cdk-app-s3-bucket', { bucketName: 'cdk-app-s3-bucket', websiteIndexDocument: 'index.html', publicReadAccess: true })
 
     // s3 deployment クライアントの資源をビルドしておきたい
+    new s3Deployment.BucketDeployment(this, 'cdk-app-s3-bucket-deployment',
+      {
+        sources: [s3Deployment.Source.asset('../client/dist')],
+        destinationBucket: s3Bucket,
+        retainOnDelete: false,
+        cacheControl: [s3Deployment.CacheControl.noCache()]
+      })
 
     //APIGateway
 
