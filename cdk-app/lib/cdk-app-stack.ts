@@ -5,6 +5,8 @@ import * as apigw from '@aws-cdk/aws-apigateway'
 import * as iam from '@aws-cdk/aws-iam'
 import * as s3 from '@aws-cdk/aws-s3'
 import * as s3Deployment from '@aws-cdk/aws-s3-deployment'
+import * as dynamodb from '@aws-cdk/aws-dynamodb'
+import { userInfo } from 'os';
 
 const LAMBDA_FUNC2_NAME = "cdk-app-function-2"
 
@@ -114,7 +116,19 @@ export class CdkAppStack extends cdk.Stack {
     })
 
     //DynamoDBテーブル
+    const ddbTable = new dynamodb.Table(this, 'cdk-app-ddb-table', {
+      tableName: 'CcdkAppTable',
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'date', type: dynamodb.AttributeType.STRING },
+      timeToLiveAttribute: 'ttl'
+    })
 
+    // GSI
+    ddbTable.addGlobalSecondaryIndex({
+      indexName: 'user-index',
+      partitionKey: { name: 'user', type: dynamodb.AttributeType.STRING }
+    })
 
 
   }
