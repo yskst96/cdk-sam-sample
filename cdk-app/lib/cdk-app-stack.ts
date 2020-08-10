@@ -1,5 +1,7 @@
 import * as cdk from '@aws-cdk/core';
 import * as lambda from '@aws-cdk/aws-lambda'
+import * as logs from '@aws-cdk/aws-logs'
+import * as apigw from '@aws-cdk/aws-apigateway'
 import * as iam from '@aws-cdk/aws-iam'
 import * as s3 from '@aws-cdk/aws-s3'
 import * as s3Deployment from '@aws-cdk/aws-s3-deployment'
@@ -24,14 +26,16 @@ export class CdkAppStack extends cdk.Stack {
     const roleArn = cdk.Fn.importValue(props.lambdaRoleExportName)
     const lambdaRole = iam.Role.fromRoleArn(this, 'cdk-app-function-2-role-arn', roleArn)
 
-    //lambda関数1
-    new lambda.Function(this, LAMBDA_FUNC2_NAME, {
+    //lambda関数
+    const lambdaFunction = new lambda.Function(this, LAMBDA_FUNC2_NAME, {
       runtime: lambda.Runtime.NODEJS_12_X,
       handler: 'index.handler',
       code: lambda.AssetCode.fromAsset('lambda/function2'),
       role: lambdaRole,
       functionName: LAMBDA_FUNC2_NAME,
-      memorySize: 128
+      memorySize: 128,
+      timeout: cdk.Duration.seconds(10),
+      environment: { FOO: 'foo_val' }
     })
 
     // S3
@@ -47,6 +51,63 @@ export class CdkAppStack extends cdk.Stack {
       })
 
     //APIGateway
+    // deploy:falseにしないとprod stageが勝手に作られる
+    const api = new apigw.RestApi(this, 'cdk-app-apigw', {
+      restApiName: 'CdkAppAPI', deploy: false
+    })
+
+    // lambda統合
+    const lambdaIntegration = new apigw.LambdaIntegration(lambdaFunction, { proxy: true })
+
+    // リソース、メソッド設定
+    const appResource = api.root.addResource('api')
+    appResource.addMethod("GET", lambdaIntegration)
+
+
+    //CORSの設定(リソースごとにやるのめんどいな)
+    appResource.addMethod("OPTIONS", new apigw.MockIntegration({
+      integrationResponses: [{
+        statusCode: "200",
+        responseParameters: {
+          "method.response.header.Access-Control-Allow-Headers":
+            "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+          "method.response.header.Access-Control-Allow-Origin": "'*'",
+          "method.response.header.Access-Control-Allow-Credentials": "'false'",
+          "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET,PUT,POST,DELETE'",
+        }
+      }],
+      passthroughBehavior: apigw.PassthroughBehavior.NEVER,
+      requestTemplates: {
+        "application/json": "{\"statusCode\": 200}"
+      }
+    }), {
+      methodResponses: [{
+        statusCode: "200",
+        responseParameters: {
+          "method.response.header.Access-Control-Allow-Headers": true,
+          "method.response.header.Access-Control-Allow-Origin": true,
+          "method.response.header.Access-Control-Allow-Credentials": true,
+          "method.response.header.Access-Control-Allow-Methods": true,
+        },
+        responseModels: {
+          "application/json": new apigw.EmptyModel()
+        },
+      }]
+    })
+
+    // apigwのaccess log用
+    const apigwAccessLogGroup = new logs.LogGroup(this, "cdk-app-apigw-accesslog");
+
+    // dev stageとそのデプロイメント
+    const apiDeployment = new apigw.Deployment(this, 'cdk-app-apigw-dev-deployment', { api: api })
+    new apigw.Stage(this, 'cdk-app-apigw-dev-stage', {
+      deployment: apiDeployment,
+      stageName: 'dev',
+      accessLogDestination: new apigw.LogGroupLogDestination(apigwAccessLogGroup),
+      accessLogFormat: apigw.AccessLogFormat.custom(
+        `reqid:${apigw.AccessLogField.contextRequestId()} errMsg:${apigw.AccessLogField.contextErrorMessage()} errMsgStr:${apigw.AccessLogField.contextErrorMessageString()} path:${apigw.AccessLogField.contextPath()} status:${apigw.AccessLogField.contextStatus()}`
+      )
+    })
 
     //DynamoDBテーブル
 
