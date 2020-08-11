@@ -43,7 +43,7 @@ sam deploy --template-file packaged.yaml --stack-name cdk-sam-app --capabilities
 
 ```
 npm run build
-cdk deploy //samのconstruct使うとcodeUriの変換がないためエラーになる...
+cdk deploy <Stack名> //samのconstruct(CdkAppSamStack)使うとcodeUriの変換がないためエラーになる...
 ```
 
 - 差分比較
