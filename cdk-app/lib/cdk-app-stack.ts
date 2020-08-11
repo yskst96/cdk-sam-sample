@@ -22,7 +22,6 @@ export class CdkAppStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props: AppStackProps) {
     super(scope, id, props);
 
-    //Laayer定義
 
     //lamba用IAMロールをimportしたい
     const roleArn = cdk.Fn.importValue(props.lambdaRoleExportName)
@@ -31,6 +30,9 @@ export class CdkAppStack extends cdk.Stack {
     // Lambda用Log Group
     // 勝手に作られるけどCDKで管理するために明示的に作っとくのが良い
     new logs.LogGroup(this, `cdk-app-lambda-loggroup`, { logGroupName: `/aws/lambda/${LAMBDA_FUNC2_NAME}`, retention: logs.RetentionDays.FIVE_DAYS })
+
+    //Laayer定義
+    new lambda.LayerVersion(this, 'cdk-app-lambda-layer', {})
 
     //lambda関数
     const lambdaFunction = new lambda.Function(this, LAMBDA_FUNC2_NAME, {
@@ -121,7 +123,8 @@ export class CdkAppStack extends cdk.Stack {
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING },
       sortKey: { name: 'date', type: dynamodb.AttributeType.STRING },
-      timeToLiveAttribute: 'ttl'
+      timeToLiveAttribute: 'ttl',
+      pointInTimeRecovery: true
     })
 
     // GSI
