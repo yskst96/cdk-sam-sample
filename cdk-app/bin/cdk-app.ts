@@ -7,6 +7,11 @@ import { CdkAppStack, AppStackProps } from '../lib/cdk-app-stack';
 
 
 const app = new cdk.App();
+
+// contextを使って環境ごとの設定が可能
+//　https://docs.aws.amazon.com/ja_jp/cdk/latest/guide/get_context_var.html
+// app.node.tryGetContext('hoge')
+
 //IAM系
 const IAMStack = new CdkAppIamStack(app, 'CdkAppIamStack');
 
