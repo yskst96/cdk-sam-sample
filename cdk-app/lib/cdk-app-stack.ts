@@ -6,7 +6,6 @@ import * as iam from '@aws-cdk/aws-iam'
 import * as s3 from '@aws-cdk/aws-s3'
 import * as s3Deployment from '@aws-cdk/aws-s3-deployment'
 import * as dynamodb from '@aws-cdk/aws-dynamodb'
-import { userInfo } from 'os';
 
 const LAMBDA_FUNC2_NAME = "cdk-app-function-2"
 
@@ -32,18 +31,24 @@ export class CdkAppStack extends cdk.Stack {
     new logs.LogGroup(this, `cdk-app-lambda-loggroup`, { logGroupName: `/aws/lambda/${LAMBDA_FUNC2_NAME}`, retention: logs.RetentionDays.FIVE_DAYS })
 
     //Laayer定義
-    new lambda.LayerVersion(this, 'cdk-app-lambda-layer', {})
+    const layer = new lambda.LayerVersion(this, 'cdk-app-lambda-layer', {
+      layerVersionName: 'cdk-app-layer',
+      compatibleRuntimes: [lambda.Runtime.NODEJS_12_X],
+      code: lambda.AssetCode.fromAsset('lambda/layer', { exclude: ['*.ts'] }),
+      license: 'MIT'
+    })
 
     //lambda関数
     const lambdaFunction = new lambda.Function(this, LAMBDA_FUNC2_NAME, {
       runtime: lambda.Runtime.NODEJS_12_X,
       handler: 'index.handler',
-      code: lambda.AssetCode.fromAsset('lambda/function2'),
+      code: lambda.AssetCode.fromAsset('lambda/function2', { exclude: ['*.ts'] }),
       role: lambdaRole,
       functionName: LAMBDA_FUNC2_NAME,
       memorySize: 128,
       timeout: cdk.Duration.seconds(10),
-      environment: { FOO: 'foo_val' }
+      environment: { FOO: 'foo_val' },
+      layers: [layer]
     })
 
     // S3

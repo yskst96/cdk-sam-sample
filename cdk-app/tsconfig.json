@@ -17,7 +17,13 @@
     "inlineSources": true,
     "experimentalDecorators": true,
     "strictPropertyInitialization": false,
-    "typeRoots": ["./node_modules/@types"]
+    "typeRoots": ["./node_modules/@types"],
+    "baseUrl": "./",
+    "paths": {
+      "~/*": ["./*"],
+      "@/*": ["./*"],
+      "*": ["./node_modules/@types/*", "./node_modules/*", "./lambda/layer/nodejs/node_modules/*"]
+    }
   },
   "exclude": ["cdk.out"]
 }
